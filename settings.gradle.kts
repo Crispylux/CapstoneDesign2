@@ -1,1 +1,1 @@
-rootProject.name = "eqz-backend"
+rootProject.name = "eqh"

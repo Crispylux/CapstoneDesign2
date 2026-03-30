@@ -1,6 +1,6 @@
-package com.capstone.eqz_backend.domain.user.repository;
+package com.capstone.eqh.domain.user.repository;
 
-import com.capstone.eqz_backend.domain.user.entity.User;
+import com.capstone.eqh.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

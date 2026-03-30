@@ -1,6 +1,6 @@
-package com.capstone.eqz_backend.domain.user.controller;
+package com.capstone.eqh.domain.user.controller;
 
-import com.capstone.eqz_backend.domain.user.service.UserLoginService;
+import com.capstone.eqh.domain.user.service.UserLoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

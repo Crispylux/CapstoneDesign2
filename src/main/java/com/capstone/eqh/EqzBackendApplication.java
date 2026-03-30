@@ -1,4 +1,4 @@
-package com.capstone.eqz_backend;
+package com.capstone.eqh;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com.capstone.eqz_backend.domain.user.service;
+package com.capstone.eqh.domain.user.service;
 
 import org.springframework.stereotype.Service;
 

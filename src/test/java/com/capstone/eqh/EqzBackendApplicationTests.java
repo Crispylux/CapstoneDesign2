@@ -1,4 +1,4 @@
-package com.capstone.eqz_backend;
+package com.capstone.eqh;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

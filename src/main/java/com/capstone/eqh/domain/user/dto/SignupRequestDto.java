@@ -1,4 +1,4 @@
-package com.capstone.eqz_backend.domain.user.dto;
+package com.capstone.eqh.domain.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

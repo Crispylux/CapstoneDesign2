@@ -1,7 +1,7 @@
-package com.capstone.eqz_backend.domain.user.entity;
+package com.capstone.eqh.domain.user.entity;
 
-import com.capstone.eqz_backend.domain.user.enums.AuthProvider;
-import com.capstone.eqz_backend.global.enums.Role;
+import com.capstone.eqh.domain.user.enums.AuthProvider;
+import com.capstone.eqh.global.enums.Role;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
