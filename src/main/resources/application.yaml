@@ -1,3 +1,5 @@
 spring:
   application:
     name: eqh
+  jwt:
+    secret: your-base64-encoded-256bit-or-longer-secret-key-here
