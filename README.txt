@@ -1,5 +1,5 @@
 **branch**
-master : 완성본이 들어갑니다(push 금지)
+master : 완성본이 들어갑니다(push 막혀있음)
 develop : 완성한 각자의 코드를 모아 develop에서 테스트합니다
 
 **pull request**
