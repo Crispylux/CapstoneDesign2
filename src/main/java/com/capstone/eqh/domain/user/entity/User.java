@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -36,6 +38,11 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 10)
     private Role role;
 
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
     @Builder
     public User(String username, String password, String email,
                 AuthProvider provider, Role role) {
@@ -44,5 +51,18 @@ public class User extends BaseTimeEntity {
         this.email = email;
         this.provider = provider;
         this.role = role;
+    }
+
+    public void updateUsername(String username) {
+        this.username = username;
+    }
+
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
+    public void softDelete() {
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }

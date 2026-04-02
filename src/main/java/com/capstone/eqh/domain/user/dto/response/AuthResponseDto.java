@@ -1,11 +1,11 @@
 package com.capstone.eqh.domain.user.dto.response;
 
-public record AuthResponse(
+public record AuthResponseDto(
         String accessToken,
         String refreshToken,
         String tokenType
 ) {
-    public AuthResponse(String accessToken, String refreshToken) {
+    public AuthResponseDto(String accessToken, String refreshToken) {
         this(accessToken, refreshToken, "Bearer");
     }
 }

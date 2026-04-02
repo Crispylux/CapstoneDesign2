@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
         log.warn("[CustomException] {} - {}", e.getErrorCode(), e.getMessage());
         ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity
-                .status(errorCode.getHttpStatus())
+                .status(errorCode.getStatusCode())
                 .body(ApiResponse.failure(errorCode.getStatusCode(), errorCode.getMessage()));
     }
 
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
         log.error("[UnhandledException] {}", e.getMessage(), e);
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         return ResponseEntity
-                .status(errorCode.getHttpStatus())
+                .status(errorCode.getStatusCode())
                 .body(ApiResponse.failure(errorCode.getStatusCode(), errorCode.getMessage()));
     }
 }

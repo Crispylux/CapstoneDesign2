@@ -1,9 +1,9 @@
 package com.capstone.eqh.domain.user.service;
 
-import com.capstone.eqh.domain.user.dto.request.LoginRequest;
-import com.capstone.eqh.domain.user.dto.request.LogoutRequest;
-import com.capstone.eqh.domain.user.dto.request.ReissueRequest;
-import com.capstone.eqh.domain.user.dto.response.AuthResponse;
+import com.capstone.eqh.domain.user.dto.request.LoginRequestDto;
+import com.capstone.eqh.domain.user.dto.request.LogoutRequestDto;
+import com.capstone.eqh.domain.user.dto.request.ReissueRequestDto;
+import com.capstone.eqh.domain.user.dto.response.AuthResponseDto;
 import com.capstone.eqh.domain.user.entity.RefreshToken;
 import com.capstone.eqh.domain.user.entity.User;
 import com.capstone.eqh.domain.user.enums.AuthProvider;
@@ -32,8 +32,9 @@ public class UserAuthService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public AuthResponse login(LoginRequest request) {
+    public AuthResponseDto login(LoginRequestDto request) {
         User user = userRepository.findByEmail(request.email())
+                .filter(u -> !u.isDeleted())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getProvider() != AuthProvider.LOCAL) {
@@ -49,14 +50,17 @@ public class UserAuthService {
 
         saveOrUpdateRefreshToken(user.getId(), refreshToken);
 
-        return new AuthResponse(accessToken, refreshToken);
+        return new AuthResponseDto(accessToken, refreshToken);
     }
 
     @Transactional
-    public AuthResponse reissue(ReissueRequest request) {
+    public AuthResponseDto reissue(ReissueRequestDto request) {
         String oldToken = request.refreshToken();
 
         Long userId = jwtProvider.getUserIdIgnoringExpiry(oldToken);
+        if (userId == null) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
 
         RefreshToken stored = refreshTokenRepository.findByToken(oldToken)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TOKEN));
@@ -74,11 +78,11 @@ public class UserAuthService {
 
         stored.updateToken(newRefreshToken, toLocalDateTime(jwtProvider.getExpiration(newRefreshToken)));
 
-        return new AuthResponse(newAccessToken, newRefreshToken);
+        return new AuthResponseDto(newAccessToken, newRefreshToken);
     }
 
     @Transactional
-    public void logout(LogoutRequest request) {
+    public void logout(LogoutRequestDto request) {
         refreshTokenRepository.findByToken(request.refreshToken())
                 .ifPresent(refreshTokenRepository::delete);
     }
@@ -89,13 +93,17 @@ public class UserAuthService {
         refreshTokenRepository.findByUserId(userId)
                 .ifPresentOrElse(
                         existing -> existing.updateToken(token, expiryDate),
-                        () -> refreshTokenRepository.save(
-                                RefreshToken.builder()
-                                        .token(token)
-                                        .userId(userId)
-                                        .expiryDate(expiryDate)
-                                        .build()
-                        )
+                        () -> {
+                            RefreshToken newToken = RefreshToken.builder()
+                                    .token(token)
+                                    .userId(userId)
+                                    .expiryDate(expiryDate)
+                                    .build();
+                            if (newToken == null) {
+                                throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+                            }
+                            refreshTokenRepository.save(newToken);
+                        }
                 );
     }
 

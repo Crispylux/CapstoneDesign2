@@ -1,10 +1,10 @@
 package com.capstone.eqh.domain.user.controller;
 
-import com.capstone.eqh.domain.user.dto.request.LoginRequest;
-import com.capstone.eqh.domain.user.dto.request.LogoutRequest;
-import com.capstone.eqh.domain.user.dto.request.ReissueRequest;
-import com.capstone.eqh.domain.user.dto.request.SignupRequest;
-import com.capstone.eqh.domain.user.dto.response.AuthResponse;
+import com.capstone.eqh.domain.user.dto.request.LoginRequestDto;
+import com.capstone.eqh.domain.user.dto.request.LogoutRequestDto;
+import com.capstone.eqh.domain.user.dto.request.ReissueRequestDto;
+import com.capstone.eqh.domain.user.dto.request.SignupRequestDto;
+import com.capstone.eqh.domain.user.dto.response.AuthResponseDto;
 import com.capstone.eqh.domain.user.service.UserAuthService;
 import com.capstone.eqh.domain.user.service.UserSignupService;
 import com.capstone.eqh.global.common.ApiResponse;
@@ -26,7 +26,7 @@ public class AuthController {
     private final UserAuthService userAuthService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupRequest request) {
+    public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupRequestDto request) {
         userSignupService.signup(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -34,19 +34,19 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
-        AuthResponse response = userAuthService.login(request);
+    public ResponseEntity<ApiResponse<AuthResponseDto>> login(@Valid @RequestBody LoginRequestDto request) {
+        AuthResponseDto response = userAuthService.login(request);
         return ResponseEntity.ok(ApiResponse.success(200, "로그인 성공", response));
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<AuthResponse>> reissue(@Valid @RequestBody ReissueRequest request) {
-        AuthResponse response = userAuthService.reissue(request);
+    public ResponseEntity<ApiResponse<AuthResponseDto>> reissue(@Valid @RequestBody ReissueRequestDto request) {
+        AuthResponseDto response = userAuthService.reissue(request);
         return ResponseEntity.ok(ApiResponse.success(200, "토큰 재발급 성공", response));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody LogoutRequest request) {
+    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody LogoutRequestDto request) {
         userAuthService.logout(request);
         return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"));
     }

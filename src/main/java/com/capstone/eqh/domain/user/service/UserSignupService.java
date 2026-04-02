@@ -1,6 +1,6 @@
 package com.capstone.eqh.domain.user.service;
 
-import com.capstone.eqh.domain.user.dto.request.SignupRequest;
+import com.capstone.eqh.domain.user.dto.request.SignupRequestDto;
 import com.capstone.eqh.domain.user.entity.User;
 import com.capstone.eqh.domain.user.enums.AuthProvider;
 import com.capstone.eqh.domain.user.enums.Role;
@@ -20,7 +20,7 @@ public class UserSignupService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void signup(SignupRequest request) {
+    public void signup(SignupRequestDto request) {
         if (!request.password().equals(request.passwordConfirm())) {
             throw new CustomException(ErrorCode.PASSWORD_CONFIRM_MISMATCH);
         }
@@ -36,7 +36,9 @@ public class UserSignupService {
                 .provider(AuthProvider.LOCAL)
                 .role(Role.USER)
                 .build();
-
+        if (user == null) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
         userRepository.save(user);
     }
 }
