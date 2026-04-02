@@ -1,83 +1,48 @@
 package com.capstone.eqh.domain.user.entity;
 
 import com.capstone.eqh.domain.user.enums.AuthProvider;
-import com.capstone.eqh.global.enums.Role;
+import com.capstone.eqh.domain.user.enums.Role;
+import com.capstone.eqh.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
-
-// 사용자 정의 권한 사용을 위한 Enum 파일 생성 후 import
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
-@SuppressWarnings({"LombokGetterMayBeUsed"})
-public class User {
-    //로컬 아이디와 소셜api 회원번호
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class User extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String username;
 
-    //소셜은 null
     @Column(nullable = true)
     private String password;
-    
-    @Column(nullable = false)
+
+    @Column(nullable = false, unique = true)
     private String email;
 
-    //LOCAL, KAKAO
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
     private AuthProvider provider;
 
-    //PROF,USER, ADMIN
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
     private Role role;
 
-    @Column(nullable = false)
-    private LocalDateTime createAt;
-
-    @Column(nullable = false)
-    private LocalDateTime modifiedAt;
-
-
-
-    //JPA가 Entity를 DataBase에 저장하기 전 호출하여 수정시간 설정
-    @PrePersist
-    protected void onCreate() {
-        this.createAt = LocalDateTime.now();
-        this.modifiedAt = LocalDateTime.now();
-    }
-    @PreUpdate
-    protected void onModified() {
-        this.modifiedAt = LocalDateTime.now();
-    }
-    //기본 생성자
-    protected User() {}
-
-    //getter
-    public Long getId() {
-        return id;
-    }
-    public String getUsername() {
-        return username;
-    }
-//    public String getPassword() {
-//        return password
-//    }
-    public String getEmail() {
-        return email;
-    }
-    public Role getRole() {
-        return role;
-    }
-    public AuthProvider getProvider() {
-        return provider;
-    }
-    public LocalDateTime getCreateAt() {
-        return createAt;
-    }
-    public LocalDateTime getModifiedAt() {
-        return modifiedAt;
+    @Builder
+    public User(String username, String password, String email,
+                AuthProvider provider, Role role) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.provider = provider;
+        this.role = role;
     }
 }

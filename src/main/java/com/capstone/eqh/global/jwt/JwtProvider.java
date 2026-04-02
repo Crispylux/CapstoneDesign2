@@ -82,7 +82,7 @@ public class JwtProvider {
     }
 
     // --Claims 추출 ---------------------------------------------------
-    public  Long getUserId(String token) {
+    public Long getUserId(String token) {
         return Long.valueOf(parseClaims(token).getSubject());
     }
 
@@ -90,11 +90,19 @@ public class JwtProvider {
         return parseClaims(token).get("role", String.class);
     }
 
-    public  Date getExpiration(String token) {
+    public Date getExpiration(String token) {
         return parseClaims(token).getExpiration();
     }
 
-    //--내뷰 유틸 -------------------------------------------------------
+    /**
+     * 서명은 검증하되 만료 여부는 무시하고 userId를 추출한다.
+     * reissue 엔드포인트 전용 — DB expiryDate가 만료 판단의 기준이 된다.
+     */
+    public Long getUserIdIgnoringExpiry(String token) {
+        return Long.valueOf(parseClaimsAllowExpired(token).getSubject());
+    }
+
+    //--내부 유틸 -------------------------------------------------------
 
     private Claims parseClaims(String token) {
         return Jwts.parser()
@@ -102,5 +110,15 @@ public class JwtProvider {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    private Claims parseClaimsAllowExpired(String token) {
+        try {
+            return parseClaims(token);
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
     }
 }
