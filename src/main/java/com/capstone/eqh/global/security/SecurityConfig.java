@@ -2,6 +2,9 @@ package com.capstone.eqh.global.security;
 
 import com.capstone.eqh.global.common.ApiResponse;
 import com.capstone.eqh.global.jwt.JwtFilter;
+import com.capstone.eqh.global.oauth2.handler.OAuth2FailureHandler;
+import com.capstone.eqh.global.oauth2.handler.OAuth2SuccessHandler;
+import com.capstone.eqh.global.oauth2.service.CustomOidcUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +16,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -31,6 +32,9 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final ObjectMapper objectMapper;
+    private final CustomOidcUserService customOidcUserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -50,6 +54,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").hasAnyRole("USER", "PROF")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
+                )
+
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.oidcUserService(customOidcUserService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler)
                 )
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
@@ -87,8 +98,4 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }

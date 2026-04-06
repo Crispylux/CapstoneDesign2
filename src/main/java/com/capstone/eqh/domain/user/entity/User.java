@@ -34,6 +34,9 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 10)
     private AuthProvider provider;
 
+    @Column
+    private String providerId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private Role role;
@@ -45,11 +48,12 @@ public class User extends BaseTimeEntity {
 
     @Builder
     public User(String username, String password, String email,
-                AuthProvider provider, Role role) {
+                AuthProvider provider, String providerId, Role role) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.provider = provider;
+        this.providerId = providerId;
         this.role = role;
     }
 

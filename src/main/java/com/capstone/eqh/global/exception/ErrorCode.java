@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // ── 400 Bad Request ───────────────────────────────────────────────
+    OAUTH2_EMAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "소셜 계정에서 이메일 정보를 가져올 수 없습니다."),
+    OAUTH2_UNSUPPORTED_PROVIDER(HttpStatus.BAD_REQUEST, "지원하지 않는 소셜 로그인 제공자입니다."),
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),
     INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "비밀번호 형식이 올바르지 않습니다."),
     PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST, "비밀번호 확인이 일치하지 않습니다."),
@@ -31,6 +33,7 @@ public enum ErrorCode {
 
     // ── 409 Conflict ──────────────────────────────────────────────────
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
+    OAUTH2_EMAIL_ALREADY_LOCAL(HttpStatus.CONFLICT, "이미 일반 계정으로 가입된 이메일입니다."),
     SOCIAL_ACCOUNT_CONFLICT(HttpStatus.CONFLICT, "소셜 로그인으로 가입된 계정입니다."),
 
     // ── 500 Internal Server Error ─────────────────────────────────────

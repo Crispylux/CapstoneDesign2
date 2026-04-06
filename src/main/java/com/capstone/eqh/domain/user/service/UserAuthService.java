@@ -82,6 +82,14 @@ public class UserAuthService {
     }
 
     @Transactional
+    public String[] issueTokenPair(Long userId, String role) {
+        String accessToken = jwtProvider.generateAccessToken(userId, role);
+        String refreshToken = jwtProvider.generateRefreshToken(userId);
+        saveOrUpdateRefreshToken(userId, refreshToken);
+        return new String[]{accessToken, refreshToken};
+    }
+
+    @Transactional
     public void logout(LogoutRequestDto request) {
         refreshTokenRepository.findByToken(request.refreshToken())
                 .ifPresent(refreshTokenRepository::delete);
