@@ -1,4 +1,8 @@
 HELP.md
+
+DEVLOG.md
+.cursorrules
+
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

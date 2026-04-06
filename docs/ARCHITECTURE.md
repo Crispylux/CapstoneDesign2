@@ -63,16 +63,19 @@ src/main/java/com/capstone/eqz_backend/
     │   └── JwtFilter.java                     # 모든 요청 JWT 검사
     │
     ├── oauth2/
+    │   ├── CustomOidcUser.java                # OidcUser 래퍼 (dbUserId, dbUserRole 포함)
     │   ├── info/
     │   │   ├── OAuth2UserInfo.java             # 추상 클래스
-    │   │   └── KakaoOAuth2UserInfo.java
+    │   │   └── KakaoOAuth2UserInfo.java        # OIDC claims (sub, nickname) 파싱
     │   ├── service/
-    │   │   └── CustomOAuth2UserService.java    # 소셜 로그인 유저 저장/업데이트
+    │   │   └── CustomOidcUserService.java      # OIDC 유저 저장/조회 (provider+providerId 기준)
     │   └── handler/
-    │       └── OAuth2SuccessHandler.java       # JWT 발급 및 리다이렉트
+    │       ├── OAuth2SuccessHandler.java       # JWT 발급 및 리다이렉트
+    │       └── OAuth2FailureHandler.java       # 로그인 실패 처리
     │
     ├── security/
     │   ├── SecurityConfig.java                # FilterChain 및 RBAC
+    │   ├── PasswordConfig.java                # PasswordEncoder 빈 (순환 의존성 분리)
     │   ├── CustomUserDetails.java
     │   └── CustomUserDetailsService.java
     │
@@ -82,7 +85,8 @@ src/main/java/com/capstone/eqz_backend/
     │   └── GlobalExceptionHandler.java
     │
     └── common/
-        └── ApiResponse.java                   # 공통 응답 규격
+        ├── ApiResponse.java                   # 공통 응답 규격
+        └── BaseTimeEntity.java                # createdAt / updatedAt 자동 관리
 ```
 
 ---
@@ -100,10 +104,10 @@ src/main/java/com/capstone/eqz_backend/
 | 패키지 | 주요 역할 |
 |--------|-----------|
 | `jwt` | 토큰 생성·검증·파싱, 요청 필터링 |
-| `oauth2` | 카카오 소셜 로그인 처리 |
-| `security` | FilterChain 구성, RBAC 적용 |
+| `oauth2` | 카카오 OIDC 로그인 처리 (provider+providerId 기반 유저 식별) |
+| `security` | FilterChain 구성, RBAC 적용, PasswordEncoder 빈 |
 | `exception` | 공통 예외 처리 |
-| `common` | 공통 응답 규격 |
+| `common` | 공통 응답 규격, JPA Auditing 기반 시간 필드 |
 
 ---
 
@@ -120,3 +124,5 @@ src/main/java/com/capstone/eqz_backend/
 - Controller는 URL 경로 기준으로 분리
   - `AuthController` — `/api/auth/**`
   - `UserController` — `/api/users/**`
+- **소셜 로그인 유저 식별**: 이메일이 아닌 `provider` + `providerId` (카카오 OIDC `sub` claim) 조합으로 식별
+  - `PasswordEncoder` 빈은 순환 의존성 방지를 위해 `PasswordConfig`에 별도 분리

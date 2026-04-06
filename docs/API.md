@@ -110,24 +110,36 @@
 
 ---
 
-## 3. 소셜 로그인 (Kakao)
+## 3. 소셜 로그인 (Kakao OpenID Connect)
+
+> **인증 방식**: Kakao OpenID Connect (OIDC)
+> 이메일 스코프가 필요 없으며 비즈앱 전환 없이 사용 가능합니다.
+> 유저 식별 기준은 **카카오 회원번호 (`sub` claim)** 입니다.
 
 ### 3-1. 로그인 요청
 
-**GET** `/oauth2/authorization/kakao` → Kakao 인증 페이지로 리다이렉트
+**GET** `/oauth2/authorization/kakao` → Kakao OIDC 인증 페이지로 리다이렉트
 
 ### 3-2. 처리 플로우
 
 ```
 ① 클라이언트 → GET /oauth2/authorization/kakao
-② 서버 → Kakao 인증 페이지로 리다이렉트
+② 서버 → Kakao OIDC 인증 페이지로 리다이렉트 (scope: openid profile_nickname)
 ③ 사용자 → Kakao 계정 선택 및 동의
-④ Kakao → 서버 콜백 (/login/oauth2/code/kakao)
-⑤ 서버 → 신규 사용자이면 자동 회원가입, 기존이면 조회
+④ Kakao → 서버 콜백 (/login/oauth2/code/kakao) + ID Token (sub, nickname)
+⑤ 서버 → sub 기준으로 신규 사용자이면 자동 회원가입, 기존이면 조회
 ⑥ 서버 → JWT 발급 후 프론트엔드로 리다이렉트
 ```
 
-### 3-3. 최종 콜백
+### 3-3. 유저 식별 방식
+
+| 항목 | 내용 |
+|------|------|
+| 식별 기준 | `provider` + `providerId` (카카오 `sub` claim) |
+| 이메일 | 사용하지 않음 — DB에는 `kakao_{sub}@social.user` 형식의 플레이스홀더 저장 |
+| 닉네임 | OIDC `nickname` claim 사용 (없으면 `카카오유저`로 대체) |
+
+### 3-4. 최종 콜백
 
 ```
 https://프론트엔드주소/oauth2/callback?accessToken=...&refreshToken=...
@@ -136,8 +148,7 @@ https://프론트엔드주소/oauth2/callback?accessToken=...&refreshToken=...
 | 상황 | 처리 방식 |
 |------|-----------|
 | 신규 소셜 사용자 | 자동 회원가입 후 JWT 발급 |
-| 기존 소셜 사용자 | 조회 후 JWT 발급 |
-| 동일 이메일 일반 계정 존재 | `409` 에러 또는 계정 연동 처리 |
+| 기존 소셜 사용자 | `providerId` 조회 후 JWT 발급 |
 
 ---
 
@@ -208,6 +219,7 @@ https://프론트엔드주소/oauth2/callback?accessToken=...&refreshToken=...
 | 필드 | 타입 | 설명 |
 |------|------|------|
 | `provider` | String | `LOCAL` / `KAKAO` |
+| `providerId` | String | 소셜 사용자의 카카오 `sub` 값. LOCAL은 `null` |
 | `role` | String | `USER` / `PROF` / `ADMIN` |
 
 ---
@@ -248,9 +260,13 @@ https://프론트엔드주소/oauth2/callback?accessToken=...&refreshToken=...
 |--------|------|-----------|------|
 | `id` | BIGINT | PK, AUTO_INCREMENT | 사용자 고유 ID |
 | `username` | VARCHAR(20) | NOT NULL | 닉네임 |
-| `email` | VARCHAR(100) | NOT NULL, UNIQUE | 이메일 |
+| `email` | VARCHAR(100) | NOT NULL, UNIQUE | 이메일 (소셜 유저는 `kakao_{sub}@social.user` 플레이스홀더) |
 | `password` | VARCHAR(255) | NULL | 소셜 로그인은 NULL |
+| `provider` | VARCHAR(10) | NOT NULL | `LOCAL` / `KAKAO` |
+| `provider_id` | VARCHAR(255) | NULL | 소셜 로그인 제공자의 고유 ID (`sub`). LOCAL은 NULL |
 | `role` | VARCHAR(10) | NOT NULL, DEFAULT 'USER' | 권한 |
+| `deleted` | BOOLEAN | NOT NULL, DEFAULT false | 소프트 삭제 여부 |
+| `deleted_at` | DATETIME | NULL | 탈퇴 처리 일시 |
 | `created_at` | DATETIME | NOT NULL | 가입일시 |
 | `updated_at` | DATETIME | NOT NULL | 수정일시 |
 
@@ -259,7 +275,8 @@ https://프론트엔드주소/oauth2/callback?accessToken=...&refreshToken=...
 | 컬럼명 | 타입 | 제약 조건 | 설명 |
 |--------|------|-----------|------|
 | `id` | BIGINT | PK, AUTO_INCREMENT | 고유 ID |
-| `user_id` | BIGINT | FK (users.id) | 사용자 ID |
+| `user_id` | BIGINT | NOT NULL | 사용자 ID |
 | `token` | VARCHAR(512) | NOT NULL, UNIQUE | Refresh Token 값 |
-| `expires_at` | DATETIME | NOT NULL | 만료일시 |
+| `expiry_date` | DATETIME | NOT NULL | 만료일시 |
 | `created_at` | DATETIME | NOT NULL | 발급일시 |
+| `updated_at` | DATETIME | NOT NULL | 갱신일시 |
